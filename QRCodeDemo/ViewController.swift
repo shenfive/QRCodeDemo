@@ -89,6 +89,7 @@ class ViewController: UIViewController,AVCaptureMetadataOutputObjectsDelegate {
         }
     }
     
+    //再啟動
     @IBAction func startScan(_ sender: Any) {
         scanQRCode()
     }
