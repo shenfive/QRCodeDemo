@@ -20,24 +20,14 @@ class ViewController: UIViewController,AVCaptureMetadataOutputObjectsDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        
-        
+
         //QRCocd 是透過 AVCaptureSession 來運作的
+     
+        //檢查是否有預設輸入設備，沒有輸入設備就中斷
+        guard let avCaptureDevice = AVCaptureDevice.default(for: AVMediaType.video) else { return }
         
-        
-        
-        //先檢查是否有預設的輸入設備
-        guard let avCaptureDevice = AVCaptureDevice.default(for: AVMediaType.video) else {
-            print("沒有輸入設備")
-            return
-        }
-        
-        //試試看影像設備是否被佔用，若正常的話它就是輸入設備
-        guard  let avCaptureInput = try? AVCaptureDeviceInput(device: avCaptureDevice) else {
-            print("無法取得影像")
-            return
-        }
+        //試試看影像設備是否被佔用，若正常的話它就是輸入設備，否則中斷
+        guard  let avCaptureInput = try? AVCaptureDeviceInput(device: avCaptureDevice) else { return }
         avCaptureSession.addInput(avCaptureInput)  //session 加上輸入
         
         
@@ -48,11 +38,6 @@ class ViewController: UIViewController,AVCaptureMetadataOutputObjectsDelegate {
         
         //加上支援的類別，這必需要加入 session 之後再做，不然會閃退
         avCaptureMetadataOutput.metadataObjectTypes =  [AVMetadataObject.ObjectType.qr, AVMetadataObject.ObjectType.code128, AVMetadataObject.ObjectType.code39, AVMetadataObject.ObjectType.code93, AVMetadataObject.ObjectType.upce, AVMetadataObject.ObjectType.pdf417, AVMetadataObject.ObjectType.ean13, AVMetadataObject.ObjectType.aztec]
-
-        
-        
-        
-        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -73,18 +58,14 @@ class ViewController: UIViewController,AVCaptureMetadataOutputObjectsDelegate {
 
     
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-       
         if metadataObjects.count > 0 {
             let machineReabableCode = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
             outputLabel.text = machineReabableCode.stringValue
             let utterance = AVSpeechUtterance(string: "找到")
             utterance.voice = AVSpeechSynthesisVoice(language: "zh-Hant")
             utterance.rate = 0.5
-
             let synthesizer = AVSpeechSynthesizer()
             synthesizer.speak(utterance)
-            
-            
             avCaptureSession.stopRunning()
         }
     }
@@ -96,10 +77,8 @@ class ViewController: UIViewController,AVCaptureMetadataOutputObjectsDelegate {
     
     
     func scanQRCode(){
-        
         //啟動掃瞄
         avCaptureSession.startRunning()
-        
     }
 
 }
